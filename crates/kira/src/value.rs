@@ -3,9 +3,11 @@
 
 mod cached;
 mod mapping;
+mod playback_rate;
 
 pub use cached::*;
 pub use mapping::*;
+pub use playback_rate::*;
 
 use crate::parameter::{ParameterHandle, ParameterId};
 

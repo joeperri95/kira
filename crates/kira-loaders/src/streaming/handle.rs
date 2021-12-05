@@ -1,6 +1,10 @@
 use std::{fmt::Display, sync::Arc};
 
-use kira::{sound::static_sound::PlaybackState, tween::Tween, value::Value};
+use kira::{
+	sound::static_sound::PlaybackState,
+	tween::Tween,
+	value::{PlaybackRate, Value},
+};
 use ringbuf::{Consumer, Producer};
 
 use crate::Error;
@@ -52,7 +56,7 @@ impl StreamingSoundHandle {
 	/// and pitch of the sound.
 	pub fn set_playback_rate(
 		&mut self,
-		playback_rate: impl Into<Value<f64>>,
+		playback_rate: impl Into<Value<PlaybackRate>>,
 	) -> Result<(), CommandQueueFull> {
 		self.command_producer
 			.push(Command::SetPlaybackRate(playback_rate.into()))

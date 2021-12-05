@@ -2,7 +2,10 @@ use std::{error::Error, fmt::Display, sync::Arc};
 
 use ringbuf::Producer;
 
-use crate::{tween::Tween, value::Value};
+use crate::{
+	tween::Tween,
+	value::{PlaybackRate, Value},
+};
 
 use super::{sound::Shared, Command, PlaybackState};
 
@@ -102,7 +105,7 @@ impl StaticSoundHandle {
 	/// ```
 	pub fn set_playback_rate(
 		&mut self,
-		playback_rate: impl Into<Value<f64>>,
+		playback_rate: impl Into<Value<PlaybackRate>>,
 	) -> Result<(), CommandQueueFull> {
 		self.command_producer
 			.push(Command::SetPlaybackRate(playback_rate.into()))

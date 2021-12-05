@@ -15,7 +15,7 @@ use crate::{
 	sound::Sound,
 	track::TrackId,
 	tween::{Tween, Tweenable},
-	value::CachedValue,
+	value::{CachedValue, PlaybackRate},
 	LoopBehavior, StartTime,
 };
 
@@ -67,7 +67,7 @@ pub(super) struct StaticSound {
 	state: PlaybackState,
 	position: f64,
 	volume: CachedValue<f64>,
-	playback_rate: CachedValue<f64>,
+	playback_rate: CachedValue<PlaybackRate>,
 	panning: CachedValue<f64>,
 	volume_fade: Tweenable,
 	shared: Arc<Shared>,
@@ -88,7 +88,7 @@ impl StaticSound {
 			state: PlaybackState::Playing,
 			position,
 			volume: CachedValue::new(settings.volume, 1.0),
-			playback_rate: CachedValue::new(settings.playback_rate, 1.0),
+			playback_rate: CachedValue::new(settings.playback_rate, PlaybackRate::Factor(1.0)),
 			panning: CachedValue::new(settings.panning, 0.5),
 			volume_fade: if let Some(tween) = settings.fade_in_tween {
 				let mut tweenable = Tweenable::new(0.0);
@@ -130,9 +130,9 @@ impl StaticSound {
 
 	fn playback_rate(&self) -> f64 {
 		if self.data.settings.reverse {
-			-self.playback_rate.get()
+			-self.playback_rate.get().as_factor()
 		} else {
-			self.playback_rate.get()
+			self.playback_rate.get().as_factor()
 		}
 	}
 

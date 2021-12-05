@@ -12,7 +12,7 @@ use kira::{
 	sound::{static_sound::PlaybackState, Sound},
 	track::TrackId,
 	tween::{Tween, Tweenable},
-	value::CachedValue,
+	value::{CachedValue, PlaybackRate},
 	StartTime,
 };
 use ringbuf::{Consumer, Producer, RingBuffer};
@@ -60,7 +60,7 @@ pub(crate) struct StreamingSound {
 	current_frame: u64,
 	fractional_position: f64,
 	volume: CachedValue<f64>,
-	playback_rate: CachedValue<f64>,
+	playback_rate: CachedValue<PlaybackRate>,
 	panning: CachedValue<f64>,
 	shared: Arc<Shared>,
 }
@@ -74,7 +74,8 @@ impl StreamingSound {
 		let sample_rate = data.sample_rate;
 		let start_time = data.settings.start_time;
 		let volume = CachedValue::new(data.settings.volume, 1.0);
-		let playback_rate = CachedValue::new(data.settings.playback_rate, 1.0);
+		let playback_rate =
+			CachedValue::new(data.settings.playback_rate, PlaybackRate::Factor(1.0));
 		let panning = CachedValue::new(data.settings.panning, 0.5);
 		let fade_in_tween = data.settings.fade_in_tween;
 		let track = data.settings.track;
@@ -256,7 +257,8 @@ impl Sound for StreamingSound {
 			next_frames[3],
 			self.fractional_position as f32,
 		);
-		self.fractional_position += self.sample_rate as f64 * self.playback_rate.get() * dt;
+		self.fractional_position +=
+			self.sample_rate as f64 * self.playback_rate.get().as_factor() * dt;
 		while self.fractional_position >= 1.0 {
 			self.fractional_position -= 1.0;
 			self.frame_consumer.pop();
