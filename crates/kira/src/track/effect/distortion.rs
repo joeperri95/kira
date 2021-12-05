@@ -39,12 +39,12 @@ pub struct DistortionSettings {
 	pub kind: DistortionKind,
 	/// The factor to multiply the signal by before applying
 	/// the distortion.
-	pub drive: Value,
+	pub drive: Value<f64>,
 	/// How much dry (unprocessed) signal should be blended
 	/// with the wet (processed) signal. `0.0` means
 	/// only the dry signal will be heard. `1.0` means
 	/// only the wet signal will be heard.
-	pub mix: Value,
+	pub mix: Value<f64>,
 }
 
 impl DistortionSettings {
@@ -60,7 +60,7 @@ impl DistortionSettings {
 
 	/// Sets the factor to multiply the signal by before applying
 	/// the distortion.
-	pub fn drive(self, drive: impl Into<Value>) -> Self {
+	pub fn drive(self, drive: impl Into<Value<f64>>) -> Self {
 		Self {
 			drive: drive.into(),
 			..self
@@ -71,7 +71,7 @@ impl DistortionSettings {
 	/// with the wet (processed) signal. `0.0` means only the dry
 	/// signal will be heard. `1.0` means only the wet signal will
 	/// be heard.
-	pub fn mix(self, mix: impl Into<Value>) -> Self {
+	pub fn mix(self, mix: impl Into<Value<f64>>) -> Self {
 		Self {
 			mix: mix.into(),
 			..self
@@ -93,8 +93,8 @@ impl Default for DistortionSettings {
 /// distorted and noisy.
 pub struct Distortion {
 	kind: DistortionKind,
-	drive: CachedValue,
-	mix: CachedValue,
+	drive: CachedValue<f64>,
+	mix: CachedValue<f64>,
 }
 
 impl Distortion {
@@ -102,8 +102,8 @@ impl Distortion {
 	pub fn new(settings: DistortionSettings) -> Self {
 		Self {
 			kind: settings.kind,
-			drive: CachedValue::new(.., settings.drive, 1.0),
-			mix: CachedValue::new(0.0..=1.0, settings.mix, 1.0),
+			drive: CachedValue::new(settings.drive, 1.0),
+			mix: CachedValue::new(settings.mix, 1.0),
 		}
 	}
 }

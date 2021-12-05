@@ -39,7 +39,7 @@ impl ClockHandle {
 	}
 
 	/// Sets the duration of time between each tick (in seconds).
-	pub fn set_interval(&mut self, interval: impl Into<Value>) -> Result<(), CommandError> {
+	pub fn set_interval(&mut self, interval: impl Into<Value<f64>>) -> Result<(), CommandError> {
 		self.command_producer
 			.push(Command::Clock(ClockCommand::SetInterval(
 				self.id,

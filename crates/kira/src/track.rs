@@ -72,9 +72,9 @@ impl TrackShared {
 
 pub(crate) struct Track {
 	shared: Arc<TrackShared>,
-	volume: CachedValue,
-	panning: CachedValue,
-	routes: Vec<(TrackId, CachedValue)>,
+	volume: CachedValue<f64>,
+	panning: CachedValue<f64>,
+	routes: Vec<(TrackId, CachedValue<f64>)>,
 	effects: Vec<Box<dyn Effect>>,
 	input: Frame,
 }
@@ -86,8 +86,8 @@ impl Track {
 		}
 		Self {
 			shared: Arc::new(TrackShared::new()),
-			volume: CachedValue::new(.., settings.volume, 1.0),
-			panning: CachedValue::new(0.0..=1.0, settings.panning, 0.5),
+			volume: CachedValue::new(settings.volume, 1.0),
+			panning: CachedValue::new(settings.panning, 0.5),
 			routes: settings.routes.into_vec(),
 			effects: settings.effects,
 			input: Frame::ZERO,
@@ -98,15 +98,15 @@ impl Track {
 		self.shared.clone()
 	}
 
-	pub fn routes_mut(&mut self) -> &mut Vec<(TrackId, CachedValue)> {
+	pub fn routes_mut(&mut self) -> &mut Vec<(TrackId, CachedValue<f64>)> {
 		&mut self.routes
 	}
 
-	pub fn set_volume(&mut self, volume: Value) {
+	pub fn set_volume(&mut self, volume: Value<f64>) {
 		self.volume.set(volume);
 	}
 
-	pub fn set_panning(&mut self, panning: Value) {
+	pub fn set_panning(&mut self, panning: Value<f64>) {
 		self.panning.set(panning);
 	}
 

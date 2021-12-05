@@ -66,9 +66,9 @@ pub(super) struct StaticSound {
 	start_time: StartTime,
 	state: PlaybackState,
 	position: f64,
-	volume: CachedValue,
-	playback_rate: CachedValue,
-	panning: CachedValue,
+	volume: CachedValue<f64>,
+	playback_rate: CachedValue<f64>,
+	panning: CachedValue<f64>,
 	volume_fade: Tweenable,
 	shared: Arc<Shared>,
 }
@@ -87,9 +87,9 @@ impl StaticSound {
 			start_time: settings.start_time,
 			state: PlaybackState::Playing,
 			position,
-			volume: CachedValue::new(.., settings.volume, 1.0),
-			playback_rate: CachedValue::new(.., settings.playback_rate, 1.0),
-			panning: CachedValue::new(0.0..=1.0, settings.panning, 0.5),
+			volume: CachedValue::new(settings.volume, 1.0),
+			playback_rate: CachedValue::new(settings.playback_rate, 1.0),
+			panning: CachedValue::new(settings.panning, 0.5),
 			volume_fade: if let Some(tween) = settings.fade_in_tween {
 				let mut tweenable = Tweenable::new(0.0);
 				tweenable.set(1.0, tween);

@@ -28,13 +28,13 @@ pub(crate) enum ParameterCommand {
 
 pub(crate) enum MixerCommand {
 	AddSubTrack(SubTrackId, Track),
-	SetTrackVolume(TrackId, Value),
-	SetTrackPanning(TrackId, Value),
+	SetTrackVolume(TrackId, Value<f64>),
+	SetTrackPanning(TrackId, Value<f64>),
 }
 
 pub(crate) enum ClockCommand {
 	Add(ClockId, Clock),
-	SetInterval(ClockId, Value),
+	SetInterval(ClockId, Value<f64>),
 	Start(ClockId),
 	Pause(ClockId),
 	Stop(ClockId),

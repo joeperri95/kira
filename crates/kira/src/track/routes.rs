@@ -6,7 +6,7 @@ use super::TrackId;
 
 /// Defines how the output of a mixer sub-track will be
 /// fed into the input of other mixer tracks.
-pub struct TrackRoutes(HashMap<TrackId, Value>);
+pub struct TrackRoutes(HashMap<TrackId, Value<f64>>);
 
 impl TrackRoutes {
 	/// Creates a new [`TrackRoutes`] with the default settings.
@@ -38,7 +38,7 @@ impl TrackRoutes {
 
 	/// Sets how much of the current track's signal will be sent
 	/// to the specified destination track.
-	pub fn with_route(mut self, track: impl Into<TrackId>, volume: impl Into<Value>) -> Self {
+	pub fn with_route(mut self, track: impl Into<TrackId>, volume: impl Into<Value<f64>>) -> Self {
 		self.0.insert(track.into(), volume.into());
 		self
 	}
@@ -49,10 +49,10 @@ impl TrackRoutes {
 		self
 	}
 
-	pub(crate) fn into_vec(self) -> Vec<(TrackId, CachedValue)> {
+	pub(crate) fn into_vec(self) -> Vec<(TrackId, CachedValue<f64>)> {
 		self.0
 			.iter()
-			.map(|(id, value)| (*id, CachedValue::new(.., *value, 0.0)))
+			.map(|(id, value)| (*id, CachedValue::new(*value, 0.0)))
 			.collect()
 	}
 }

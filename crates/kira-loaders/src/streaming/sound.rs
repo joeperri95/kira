@@ -59,9 +59,9 @@ pub(crate) struct StreamingSound {
 	volume_fade: Tweenable,
 	current_frame: u64,
 	fractional_position: f64,
-	volume: CachedValue,
-	playback_rate: CachedValue,
-	panning: CachedValue,
+	volume: CachedValue<f64>,
+	playback_rate: CachedValue<f64>,
+	panning: CachedValue<f64>,
 	shared: Arc<Shared>,
 }
 
@@ -73,9 +73,9 @@ impl StreamingSound {
 	) -> Result<Self, Error> {
 		let sample_rate = data.sample_rate;
 		let start_time = data.settings.start_time;
-		let volume = CachedValue::new(.., data.settings.volume, 1.0);
-		let playback_rate = CachedValue::new(0.0.., data.settings.playback_rate, 1.0);
-		let panning = CachedValue::new(0.0..=1.0, data.settings.panning, 0.5);
+		let volume = CachedValue::new(data.settings.volume, 1.0);
+		let playback_rate = CachedValue::new(data.settings.playback_rate, 1.0);
+		let panning = CachedValue::new(data.settings.panning, 0.5);
 		let fade_in_tween = data.settings.fade_in_tween;
 		let track = data.settings.track;
 		let (mut frame_producer, frame_consumer) = RingBuffer::new(BUFFER_SIZE).split();

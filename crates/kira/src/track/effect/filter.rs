@@ -32,17 +32,17 @@ pub struct FilterSettings {
 	/// The frequencies that the filter will remove.
 	pub mode: FilterMode,
 	/// The cutoff frequency of the filter (in hertz).
-	pub cutoff: Value,
+	pub cutoff: Value<f64>,
 	/// The resonance of the filter.
 	///
 	/// The resonance is a feedback effect that produces
 	/// a distinctive "ringing" sound.
-	pub resonance: Value,
+	pub resonance: Value<f64>,
 	/// How much dry (unprocessed) signal should be blended
 	/// with the wet (processed) signal. `0.0` means
 	/// only the dry signal will be heard. `1.0` means
 	/// only the wet signal will be heard.
-	pub mix: Value,
+	pub mix: Value<f64>,
 }
 
 impl FilterSettings {
@@ -57,7 +57,7 @@ impl FilterSettings {
 	}
 
 	/// Sets the cutoff frequency of the filter (in hertz).
-	pub fn cutoff<V: Into<Value>>(self, cutoff: V) -> Self {
+	pub fn cutoff<V: Into<Value<f64>>>(self, cutoff: V) -> Self {
 		Self {
 			cutoff: cutoff.into(),
 			..self
@@ -65,7 +65,7 @@ impl FilterSettings {
 	}
 
 	/// Sets the resonance of the filter.
-	pub fn resonance<V: Into<Value>>(self, resonance: V) -> Self {
+	pub fn resonance<V: Into<Value<f64>>>(self, resonance: V) -> Self {
 		Self {
 			resonance: resonance.into(),
 			..self
@@ -76,7 +76,7 @@ impl FilterSettings {
 	/// with the wet (processed) signal. `0.0` means only the dry
 	/// signal will be heard. `1.0` means only the wet signal will
 	/// be heard.
-	pub fn mix(self, mix: impl Into<Value>) -> Self {
+	pub fn mix(self, mix: impl Into<Value<f64>>) -> Self {
 		Self {
 			mix: mix.into(),
 			..self
@@ -88,9 +88,9 @@ impl Default for FilterSettings {
 	fn default() -> Self {
 		Self {
 			mode: FilterMode::LowPass,
-			cutoff: 1000.0.into(),
-			resonance: 0.0.into(),
-			mix: 1.0.into(),
+			cutoff: Value::Fixed(1000.0),
+			resonance: Value::Fixed(0.0),
+			mix: Value::Fixed(1.0),
 		}
 	}
 }
@@ -98,9 +98,9 @@ impl Default for FilterSettings {
 /// An effect that removes frequencies from input audio.
 pub struct Filter {
 	mode: FilterMode,
-	cutoff: CachedValue,
-	resonance: CachedValue,
-	mix: CachedValue,
+	cutoff: CachedValue<f64>,
+	resonance: CachedValue<f64>,
+	mix: CachedValue<f64>,
 	ic1eq: Frame,
 	ic2eq: Frame,
 }
@@ -110,9 +110,9 @@ impl Filter {
 	pub fn new(settings: FilterSettings) -> Self {
 		Self {
 			mode: settings.mode,
-			cutoff: CachedValue::new(20.0..=20000.0, settings.cutoff, 10000.0),
-			resonance: CachedValue::new(0.0..=1.0, settings.resonance, 0.0),
-			mix: CachedValue::new(0.0..=1.0, settings.mix, 1.0),
+			cutoff: CachedValue::new(settings.cutoff, 10000.0),
+			resonance: CachedValue::new(settings.resonance, 0.0),
+			mix: CachedValue::new(settings.mix, 1.0),
 			ic1eq: Frame::ZERO,
 			ic2eq: Frame::ZERO,
 		}

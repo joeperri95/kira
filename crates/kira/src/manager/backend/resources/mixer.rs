@@ -16,7 +16,7 @@ pub(crate) struct Mixer {
 	main_track: Track,
 	sub_tracks: Arena<Track>,
 	sub_track_ids: Vec<SubTrackId>,
-	dummy_routes: Vec<(TrackId, CachedValue)>,
+	dummy_routes: Vec<(TrackId, CachedValue<f64>)>,
 	unused_track_producer: Producer<Track>,
 }
 

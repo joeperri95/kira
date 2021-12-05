@@ -233,7 +233,10 @@ impl<B: Backend> AudioManager<B> {
 	}
 
 	/// Creates a clock.
-	pub fn add_clock(&mut self, interval: impl Into<Value>) -> Result<ClockHandle, AddClockError> {
+	pub fn add_clock(
+		&mut self,
+		interval: impl Into<Value<f64>>,
+	) -> Result<ClockHandle, AddClockError> {
 		let id = ClockId(
 			self.resource_controllers
 				.clock_controller

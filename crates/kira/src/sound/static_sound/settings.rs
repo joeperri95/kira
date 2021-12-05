@@ -9,16 +9,16 @@ pub struct StaticSoundSettings {
 	/// The initial playback position of the sound (in seconds).
 	pub start_position: f64,
 	/// The volume of the sound.
-	pub volume: Value,
+	pub volume: Value<f64>,
 	/// The playback rate of the sound, as a factor of the
 	/// normal playback rate.
 	///
 	/// Changing the playback rate will change both the speed
 	/// and the pitch of the sound.
-	pub playback_rate: Value,
+	pub playback_rate: Value<f64>,
 	/// The panning of the sound, where 0 is hard left
 	/// and 1 is hard right.
-	pub panning: Value,
+	pub panning: Value<f64>,
 	/// Whether the sound should play in reverse.
 	///
 	/// If set to `true`, the start position will be relative
@@ -65,7 +65,7 @@ impl StaticSoundSettings {
 	}
 
 	/// Sets the volume of the sound.
-	pub fn volume(self, volume: impl Into<Value>) -> Self {
+	pub fn volume(self, volume: impl Into<Value<f64>>) -> Self {
 		Self {
 			volume: volume.into(),
 			..self
@@ -77,7 +77,7 @@ impl StaticSoundSettings {
 	///
 	/// Changing the playback rate will change both the speed
 	/// and the pitch of the sound.
-	pub fn playback_rate(self, playback_rate: impl Into<Value>) -> Self {
+	pub fn playback_rate(self, playback_rate: impl Into<Value<f64>>) -> Self {
 		Self {
 			playback_rate: playback_rate.into(),
 			..self
@@ -86,7 +86,7 @@ impl StaticSoundSettings {
 
 	/// Sets the panning of the sound, where 0 is hard left
 	/// and 1 is hard right.
-	pub fn panning(self, panning: impl Into<Value>) -> Self {
+	pub fn panning(self, panning: impl Into<Value<f64>>) -> Self {
 		Self {
 			panning: panning.into(),
 			..self

@@ -11,9 +11,9 @@ use crate::{
 #[non_exhaustive]
 pub struct DelaySettings {
 	/// The delay time (in seconds).
-	pub delay_time: Value,
+	pub delay_time: Value<f64>,
 	/// The amount of feedback.
-	pub feedback: Value,
+	pub feedback: Value<f64>,
 	/// The amount of audio the delay can store (in seconds).
 	/// This affects the maximum delay time.
 	pub buffer_length: f64,
@@ -23,7 +23,7 @@ pub struct DelaySettings {
 	/// with the wet (processed) signal. `0.0` means
 	/// only the dry signal will be heard. `1.0` means
 	/// only the wet signal will be heard.
-	pub mix: Value,
+	pub mix: Value<f64>,
 }
 
 impl DelaySettings {
@@ -33,7 +33,7 @@ impl DelaySettings {
 	}
 
 	/// Sets the delay time (in seconds).
-	pub fn delay_time(self, delay_time: impl Into<Value>) -> Self {
+	pub fn delay_time(self, delay_time: impl Into<Value<f64>>) -> Self {
 		Self {
 			delay_time: delay_time.into(),
 			..self
@@ -41,7 +41,7 @@ impl DelaySettings {
 	}
 
 	/// Sets the amount of feedback.
-	pub fn feedback(self, feedback: impl Into<Value>) -> Self {
+	pub fn feedback(self, feedback: impl Into<Value<f64>>) -> Self {
 		Self {
 			feedback: feedback.into(),
 			..self
@@ -66,7 +66,7 @@ impl DelaySettings {
 	/// with the wet (processed) signal. `0.0` means only the dry
 	/// signal will be heard. `1.0` means only the wet signal will
 	/// be heard.
-	pub fn mix(self, mix: impl Into<Value>) -> Self {
+	pub fn mix(self, mix: impl Into<Value<f64>>) -> Self {
 		Self {
 			mix: mix.into(),
 			..self
@@ -100,9 +100,9 @@ enum DelayState {
 /// An effect that repeats audio after a certain delay. Useful
 /// for creating echo effects.
 pub struct Delay {
-	delay_time: CachedValue,
-	feedback: CachedValue,
-	mix: CachedValue,
+	delay_time: CachedValue<f64>,
+	feedback: CachedValue<f64>,
+	mix: CachedValue<f64>,
 	state: DelayState,
 	feedback_effects: Vec<Box<dyn Effect>>,
 }
@@ -111,9 +111,9 @@ impl Delay {
 	/// Creates a new delay effect.
 	pub fn new(settings: DelaySettings) -> Self {
 		Self {
-			delay_time: CachedValue::new(0.0.., settings.delay_time, 0.5),
-			feedback: CachedValue::new(-1.0..=1.0, settings.feedback, 0.5),
-			mix: CachedValue::new(0.0..=1.0, settings.mix, 0.5),
+			delay_time: CachedValue::new(settings.delay_time, 0.5),
+			feedback: CachedValue::new(settings.feedback, 0.5),
+			mix: CachedValue::new(settings.mix, 0.5),
 			state: DelayState::Uninitialized {
 				buffer_length: settings.buffer_length,
 			},

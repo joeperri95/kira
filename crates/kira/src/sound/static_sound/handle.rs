@@ -63,7 +63,7 @@ impl StaticSoundHandle {
 	/// #
 	/// # Result::<(), Box<dyn Error>>::Ok(())
 	/// ```
-	pub fn set_volume(&mut self, volume: impl Into<Value>) -> Result<(), CommandQueueFull> {
+	pub fn set_volume(&mut self, volume: impl Into<Value<f64>>) -> Result<(), CommandQueueFull> {
 		self.command_producer
 			.push(Command::SetVolume(volume.into()))
 			.map_err(|_| CommandQueueFull)
@@ -102,7 +102,7 @@ impl StaticSoundHandle {
 	/// ```
 	pub fn set_playback_rate(
 		&mut self,
-		playback_rate: impl Into<Value>,
+		playback_rate: impl Into<Value<f64>>,
 	) -> Result<(), CommandQueueFull> {
 		self.command_producer
 			.push(Command::SetPlaybackRate(playback_rate.into()))
@@ -137,7 +137,7 @@ impl StaticSoundHandle {
 	/// #
 	/// # Result::<(), Box<dyn Error>>::Ok(())
 	/// ```
-	pub fn set_panning(&mut self, panning: impl Into<Value>) -> Result<(), CommandQueueFull> {
+	pub fn set_panning(&mut self, panning: impl Into<Value<f64>>) -> Result<(), CommandQueueFull> {
 		self.command_producer
 			.push(Command::SetPanning(panning.into()))
 			.map_err(|_| CommandQueueFull)

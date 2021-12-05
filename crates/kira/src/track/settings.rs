@@ -6,10 +6,10 @@ use super::{routes::TrackRoutes, Effect};
 #[non_exhaustive]
 pub struct TrackSettings {
 	/// The volume of the track.
-	pub volume: Value,
+	pub volume: Value<f64>,
 	/// The panning of the track, where 0 is hard left
 	/// and 1 is hard right.
-	pub panning: Value,
+	pub panning: Value<f64>,
 	/// How the output of this track should be routed
 	/// to other mixer tracks.
 	pub routes: TrackRoutes,
@@ -30,7 +30,7 @@ impl TrackSettings {
 	}
 
 	/// Sets the volume of the track.
-	pub fn volume(self, volume: impl Into<Value>) -> Self {
+	pub fn volume(self, volume: impl Into<Value<f64>>) -> Self {
 		Self {
 			volume: volume.into(),
 			..self
@@ -39,7 +39,7 @@ impl TrackSettings {
 
 	/// Sets the panning of the track, where 0 is hard left
 	/// and 1 is hard right.
-	pub fn panning(self, panning: impl Into<Value>) -> Self {
+	pub fn panning(self, panning: impl Into<Value<f64>>) -> Self {
 		Self {
 			panning: panning.into(),
 			..self

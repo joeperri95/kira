@@ -24,17 +24,17 @@ pub struct ReverbSettings {
 	/// How much the room reverberates. A higher value will
 	/// result in a bigger sounding room. 1.0 gives an infinitely
 	/// reverberating room.
-	pub feedback: Value,
+	pub feedback: Value<f64>,
 	/// How quickly high frequencies disappear from the reverberation.
-	pub damping: Value,
+	pub damping: Value<f64>,
 	/// The stereo width of the reverb effect (0.0 being fully mono,
 	/// 1.0 being fully stereo).
-	pub stereo_width: Value,
+	pub stereo_width: Value<f64>,
 	/// How much dry (unprocessed) signal should be blended
 	/// with the wet (processed) signal. `0.0` means
 	/// only the dry signal will be heard. `1.0` means
 	/// only the wet signal will be heard.
-	pub mix: Value,
+	pub mix: Value<f64>,
 }
 
 impl ReverbSettings {
@@ -46,7 +46,7 @@ impl ReverbSettings {
 	/// Sets how much the room reverberates. A higher value will
 	/// result in a bigger sounding room. 1.0 gives an infinitely
 	/// reverberating room.
-	pub fn feedback(self, feedback: impl Into<Value>) -> Self {
+	pub fn feedback(self, feedback: impl Into<Value<f64>>) -> Self {
 		Self {
 			feedback: feedback.into(),
 			..self
@@ -54,7 +54,7 @@ impl ReverbSettings {
 	}
 
 	/// Sets how quickly high frequencies disappear from the reverberation.
-	pub fn damping(self, damping: impl Into<Value>) -> Self {
+	pub fn damping(self, damping: impl Into<Value<f64>>) -> Self {
 		Self {
 			damping: damping.into(),
 			..self
@@ -63,7 +63,7 @@ impl ReverbSettings {
 
 	/// Sets the stereo width of the reverb effect (0.0 being fully mono,
 	/// 1.0 being fully stereo).
-	pub fn stereo_width(self, stereo_width: impl Into<Value>) -> Self {
+	pub fn stereo_width(self, stereo_width: impl Into<Value<f64>>) -> Self {
 		Self {
 			stereo_width: stereo_width.into(),
 			..self
@@ -74,7 +74,7 @@ impl ReverbSettings {
 	/// with the wet (processed) signal. `0.0` means only the dry
 	/// signal will be heard. `1.0` means only the wet signal will
 	/// be heard.
-	pub fn mix(self, mix: impl Into<Value>) -> Self {
+	pub fn mix(self, mix: impl Into<Value<f64>>) -> Self {
 		Self {
 			mix: mix.into(),
 			..self
@@ -106,10 +106,10 @@ enum ReverbState {
 // This code is based on Freeverb by Jezar at Dreampoint, found here:
 // http://blog.bjornroche.com/2012/06/freeverb-original-public-domain-code-by.html
 pub struct Reverb {
-	feedback: CachedValue,
-	damping: CachedValue,
-	stereo_width: CachedValue,
-	mix: CachedValue,
+	feedback: CachedValue<f64>,
+	damping: CachedValue<f64>,
+	stereo_width: CachedValue<f64>,
+	mix: CachedValue<f64>,
 	state: ReverbState,
 }
 
@@ -117,10 +117,10 @@ impl Reverb {
 	/// Creates a new `Reverb` effect.
 	pub fn new(settings: ReverbSettings) -> Self {
 		Self {
-			feedback: CachedValue::new(-1.0..=1.0, settings.feedback, 0.9),
-			damping: CachedValue::new(0.0..=1.0, settings.damping, 0.1),
-			stereo_width: CachedValue::new(0.0..=1.0, settings.stereo_width, 1.0),
-			mix: CachedValue::new(0.0..=1.0, settings.mix, 0.5),
+			feedback: CachedValue::new(settings.feedback, 0.9),
+			damping: CachedValue::new(settings.damping, 0.1),
+			stereo_width: CachedValue::new(settings.stereo_width, 1.0),
+			mix: CachedValue::new(settings.mix, 0.5),
 			state: ReverbState::Uninitialized,
 		}
 	}

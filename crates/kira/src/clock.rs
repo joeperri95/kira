@@ -65,17 +65,17 @@ impl ClockShared {
 pub struct Clock {
 	shared: Arc<ClockShared>,
 	ticking: bool,
-	interval: CachedValue,
+	interval: CachedValue<f64>,
 	ticks: u64,
 	tick_timer: f64,
 }
 
 impl Clock {
-	pub(crate) fn new(interval: Value) -> Self {
+	pub(crate) fn new(interval: Value<f64>) -> Self {
 		Self {
 			shared: Arc::new(ClockShared::new()),
 			ticking: false,
-			interval: CachedValue::new(0.0.., interval, 1.0),
+			interval: CachedValue::new(interval, 1.0),
 			ticks: 0,
 			tick_timer: 1.0,
 		}
@@ -95,7 +95,7 @@ impl Clock {
 		self.ticks
 	}
 
-	pub(crate) fn set_interval(&mut self, interval: Value) {
+	pub(crate) fn set_interval(&mut self, interval: Value<f64>) {
 		self.interval.set(interval);
 	}
 
