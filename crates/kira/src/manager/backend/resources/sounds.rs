@@ -3,7 +3,7 @@ use ringbuf::Producer;
 
 use crate::{manager::command::SoundCommand, sound::Sound};
 
-use super::{mixer::Mixer, Clocks, Parameters};
+use super::{mixer::Mixer, Clocks};
 
 pub(crate) struct Sounds {
 	sounds: Arena<Box<dyn Sound>>,
@@ -52,16 +52,10 @@ impl Sounds {
 		}
 	}
 
-	pub fn process(
-		&mut self,
-		dt: f64,
-		parameters: &Parameters,
-		clocks: &Clocks,
-		mixer: &mut Mixer,
-	) {
+	pub fn process(&mut self, dt: f64, clocks: &Clocks, mixer: &mut Mixer) {
 		for (_, sound) in &mut self.sounds {
 			if let Some(track) = mixer.track_mut(sound.track()) {
-				track.add_input(sound.process(dt, parameters, clocks));
+				track.add_input(sound.process(dt, clocks));
 			}
 		}
 	}

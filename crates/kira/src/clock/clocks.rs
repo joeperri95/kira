@@ -6,8 +6,6 @@ use crate::{
 	manager::command::ClockCommand,
 };
 
-use super::Parameters;
-
 /// Provides access to all existing [`Clock`]s.
 ///
 /// You'll only have access to this if you're writing your own
@@ -80,9 +78,9 @@ impl Clocks {
 		}
 	}
 
-	pub(crate) fn update(&mut self, dt: f64, parameters: &Parameters) {
+	pub(crate) fn update(&mut self, dt: f64) {
 		for (_, clock) in &mut self.clocks {
-			clock.update(dt, parameters);
+			clock.update(dt);
 		}
 	}
 }
