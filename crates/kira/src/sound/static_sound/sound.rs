@@ -11,6 +11,7 @@ use ringbuf::Consumer;
 use crate::{
 	clock::{ClockTime, Clocks},
 	dsp::Frame,
+	parameter::{Parameter, ParameterHandle},
 	sound::Sound,
 	track::TrackId,
 	tween::{Tween, Tweenable},
@@ -58,48 +59,67 @@ impl Shared {
 	}
 }
 
+pub(super) struct StaticSoundParameterHandles {
+	pub(super) volume: ParameterHandle,
+	pub(super) playback_rate: ParameterHandle,
+	pub(super) panning: ParameterHandle,
+}
+
 pub(super) struct StaticSound {
 	command_consumer: Consumer<Command>,
 	data: StaticSoundData,
 	start_time: StartTime,
 	state: PlaybackState,
 	position: f64,
-	volume: f64,
-	playback_rate: f64,
-	panning: f64,
+	volume: Parameter,
+	playback_rate: Parameter,
+	panning: Parameter,
 	volume_fade: Tweenable,
 	shared: Arc<Shared>,
 }
 
 impl StaticSound {
-	pub fn new(data: StaticSoundData, command_consumer: Consumer<Command>) -> Self {
+	pub fn new(
+		data: StaticSoundData,
+		command_consumer: Consumer<Command>,
+	) -> (Self, StaticSoundParameterHandles) {
 		let settings = data.settings;
 		let position = if settings.reverse {
 			data.duration().as_secs_f64() - settings.start_position
 		} else {
 			settings.start_position
 		};
-		Self {
-			command_consumer,
-			data,
-			start_time: settings.start_time,
-			state: PlaybackState::Playing,
-			position,
-			volume: settings.volume,
-			playback_rate: settings.playback_rate,
-			panning: settings.panning,
-			volume_fade: if let Some(tween) = settings.fade_in_tween {
-				let mut tweenable = Tweenable::new(0.0);
-				tweenable.set(1.0, tween);
-				tweenable
-			} else {
-				Tweenable::new(1.0)
+		let (volume, volume_handle) = Parameter::new(settings.volume);
+		let (playback_rate, playback_rate_handle) = Parameter::new(settings.playback_rate);
+		let (panning, panning_handle) = Parameter::new(settings.panning);
+		(
+			Self {
+				command_consumer,
+				data,
+				start_time: settings.start_time,
+				state: PlaybackState::Playing,
+				position,
+				volume,
+				playback_rate,
+				panning,
+				volume_fade: if let Some(tween) = settings.fade_in_tween {
+					let mut tweenable = Tweenable::new(0.0);
+					tweenable.set(1.0, tween);
+					tweenable
+				} else {
+					Tweenable::new(1.0)
+				},
+				shared: Arc::new(Shared {
+					state: AtomicU8::new(PlaybackState::Playing as u8),
+					position: AtomicU64::new(position.to_bits()),
+				}),
 			},
-			shared: Arc::new(Shared {
-				state: AtomicU8::new(PlaybackState::Playing as u8),
-				position: AtomicU64::new(position.to_bits()),
-			}),
-		}
+			StaticSoundParameterHandles {
+				volume: volume_handle,
+				playback_rate: playback_rate_handle,
+				panning: panning_handle,
+			},
+		)
 	}
 
 	pub(super) fn shared(&self) -> Arc<Shared> {
@@ -128,9 +148,9 @@ impl StaticSound {
 
 	fn playback_rate(&self) -> f64 {
 		if self.data.settings.reverse {
-			-self.playback_rate
+			-self.playback_rate.get()
 		} else {
-			self.playback_rate
+			self.playback_rate.get()
 		}
 	}
 
@@ -158,9 +178,6 @@ impl Sound for StaticSound {
 			.store(self.position.to_bits(), Ordering::SeqCst);
 		while let Some(command) = self.command_consumer.pop() {
 			match command {
-				Command::SetVolume(volume) => self.volume = volume,
-				Command::SetPlaybackRate(playback_rate) => self.playback_rate = playback_rate,
-				Command::SetPanning(panning) => self.panning = panning,
 				Command::Pause(tween) => self.pause(tween),
 				Command::Resume(tween) => self.resume(tween),
 				Command::Stop(tween) => self.stop(tween),
@@ -170,9 +187,15 @@ impl Sound for StaticSound {
 				}
 			}
 		}
+		self.volume.on_start_processing();
+		self.playback_rate.on_start_processing();
+		self.panning.on_start_processing();
 	}
 
 	fn process(&mut self, dt: f64, clocks: &Clocks) -> Frame {
+		self.volume.update(dt, clocks);
+		self.playback_rate.update(dt, clocks);
+		self.panning.update(dt, clocks);
 		if let StartTime::ClockTime(ClockTime { clock, ticks }) = self.start_time {
 			if let Some(clock) = clocks.get(clock) {
 				if clock.ticking() && clock.ticks() >= ticks {
@@ -195,7 +218,8 @@ impl Sound for StaticSound {
 		}
 		let out = self.data.frame_at_position(self.position);
 		self.increment_playback_position(self.playback_rate() * dt);
-		(out * self.volume_fade.value() as f32 * self.volume as f32).panned(self.panning as f32)
+		(out * self.volume_fade.get() as f32 * self.volume.get() as f32)
+			.panned(self.panning.get() as f32)
 	}
 
 	fn finished(&self) -> bool {

@@ -95,6 +95,6 @@ impl Renderer {
 			&mut self.resources.mixer,
 		);
 		let out = self.resources.mixer.process(self.context.dt);
-		out * self.fade_volume.value() as f32
+		out * self.fade_volume.get() as f32
 	}
 }

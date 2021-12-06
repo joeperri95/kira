@@ -259,7 +259,7 @@ impl Sound for StreamingSound {
 		if self.finished_signal_receiver.load(Ordering::SeqCst) && self.frame_consumer.is_empty() {
 			self.set_state(PlaybackState::Stopped);
 		}
-		(out * self.volume_fade.value() as f32 * self.volume as f32).panned(self.panning as f32)
+		(out * self.volume_fade.get() as f32 * self.volume as f32).panned(self.panning as f32)
 	}
 
 	fn finished(&self) -> bool {

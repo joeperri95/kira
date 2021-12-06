@@ -27,3 +27,16 @@ impl Display for CommandError {
 }
 
 impl Error for CommandError {}
+
+/// An error that occurs when trying to modify something
+/// whose command queue is full.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct CommandQueueFull;
+
+impl Display for CommandQueueFull {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str("Cannot send a command to the audio renderer because the command queue is full")
+	}
+}
+
+impl Error for CommandQueueFull {}

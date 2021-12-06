@@ -7,7 +7,11 @@ use crate::{
 	sound::{Sound, SoundData},
 };
 
-use super::{handle::StaticSoundHandle, sound::StaticSound, StaticSoundSettings};
+use super::{
+	handle::StaticSoundHandle,
+	sound::{StaticSound, StaticSoundParameterHandles},
+	StaticSoundSettings,
+};
 
 const COMMAND_BUFFER_CAPACITY: usize = 8;
 
@@ -60,13 +64,23 @@ impl SoundData for StaticSoundData {
 	#[allow(clippy::type_complexity)]
 	fn into_sound(self) -> Result<(Box<dyn Sound>, Self::Handle), Self::Error> {
 		let (command_producer, command_consumer) = RingBuffer::new(COMMAND_BUFFER_CAPACITY).split();
-		let sound = StaticSound::new(self, command_consumer);
+		let (
+			sound,
+			StaticSoundParameterHandles {
+				volume,
+				playback_rate,
+				panning,
+			},
+		) = StaticSound::new(self, command_consumer);
 		let shared = sound.shared();
 		Ok((
 			Box::new(sound),
 			StaticSoundHandle {
 				command_producer,
 				shared,
+				volume,
+				playback_rate,
+				panning,
 			},
 		))
 	}

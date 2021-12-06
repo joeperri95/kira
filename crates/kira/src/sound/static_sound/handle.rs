@@ -1,28 +1,18 @@
-use std::{error::Error, fmt::Display, sync::Arc};
+use std::sync::Arc;
 
 use ringbuf::Producer;
 
-use crate::tween::Tween;
+use crate::{parameter::ParameterHandle, tween::Tween, CommandQueueFull};
 
 use super::{sound::Shared, Command, PlaybackState};
-
-/// An error that occurs when trying to modify a static sound
-/// whose command queue is full.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct CommandQueueFull;
-
-impl Display for CommandQueueFull {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str("Cannot send a command to the sound because the command queue is full")
-	}
-}
-
-impl Error for CommandQueueFull {}
 
 /// Controls a static sound.
 pub struct StaticSoundHandle {
 	pub(super) command_producer: Producer<Command>,
 	pub(super) shared: Arc<Shared>,
+	pub(super) volume: ParameterHandle,
+	pub(super) playback_rate: ParameterHandle,
+	pub(super) panning: ParameterHandle,
 }
 
 impl StaticSoundHandle {
@@ -36,108 +26,32 @@ impl StaticSoundHandle {
 		self.shared.position()
 	}
 
-	/// Sets the volume of the sound (as a factor of the original volume).
-	///
-	/// ## Example
-	/// ```
-	/// # use std::{error::Error, sync::Arc};
-	/// #
-	/// # use kira::{
-	/// # 	manager::{backend::MockBackend, AudioManager},
-	/// # 	sound::static_sound::StaticSoundData,
-	/// # };
-	/// #
-	/// # let mut audio_manager = AudioManager::new(MockBackend::new(1), Default::default()).unwrap();
-	/// # let mut sound = audio_manager.play(StaticSoundData {
-	/// # 	sample_rate: 1,
-	/// # 	frames: Arc::new(vec![]),
-	/// # 	settings: Default::default(),
-	/// # })?;
-	/// #
-	/// // set the volume to a fixed value
-	/// sound.set_volume(0.75)?;
-	///
-	/// // set the volume to follow a parameter
-	/// let parameter = audio_manager.add_parameter(0.5)?;
-	/// sound.set_volume(&parameter)?;
-	/// #
-	/// # Result::<(), Box<dyn Error>>::Ok(())
-	/// ```
-	pub fn set_volume(&mut self, volume: f64) -> Result<(), CommandQueueFull> {
-		self.command_producer
-			.push(Command::SetVolume(volume))
-			.map_err(|_| CommandQueueFull)
+	pub fn volume(&self) -> f64 {
+		self.volume.get()
 	}
 
-	/// Sets the playback rate of the sound (as a factor of the
-	/// original speed).
-	///
-	/// Changing the playback rate will change both the speed
-	/// and pitch of the sound.
-	///
-	/// ## Example
-	/// ```
-	/// # use std::{error::Error, sync::Arc};
-	/// #
-	/// # use kira::{
-	/// # 	manager::{backend::MockBackend, AudioManager},
-	/// # 	sound::static_sound::StaticSoundData,
-	/// # };
-	/// #
-	/// # let mut audio_manager = AudioManager::new(MockBackend::new(1), Default::default()).unwrap();
-	/// # let mut sound = audio_manager.play(StaticSoundData {
-	/// # 	sample_rate: 1,
-	/// # 	frames: Arc::new(vec![]),
-	/// # 	settings: Default::default(),
-	/// # })?;
-	/// #
-	/// // set the playback rate to a fixed value
-	/// sound.set_playback_rate(0.75)?;
-	///
-	/// // set the playback rate to follow a parameter
-	/// let parameter = audio_manager.add_parameter(0.5)?;
-	/// sound.set_playback_rate(&parameter)?;
-	/// #
-	/// # Result::<(), Box<dyn Error>>::Ok(())
-	/// ```
-	pub fn set_playback_rate(&mut self, playback_rate: f64) -> Result<(), CommandQueueFull> {
-		self.command_producer
-			.push(Command::SetPlaybackRate(playback_rate))
-			.map_err(|_| CommandQueueFull)
+	pub fn playback_rate(&self) -> f64 {
+		self.playback_rate.get()
 	}
 
-	/// Sets the panning of the sound, where `0.0` is hard left,
-	/// `0.5` is center, and `1.0` is hard right.
-	///
-	/// ## Example
-	/// ```
-	/// # use std::{error::Error, sync::Arc};
-	/// #
-	/// # use kira::{
-	/// # 	manager::{backend::MockBackend, AudioManager},
-	/// # 	sound::static_sound::StaticSoundData,
-	/// # };
-	/// #
-	/// # let mut audio_manager = AudioManager::new(MockBackend::new(1), Default::default()).unwrap();
-	/// # let mut sound = audio_manager.play(StaticSoundData {
-	/// # 	sample_rate: 1,
-	/// # 	frames: Arc::new(vec![]),
-	/// # 	settings: Default::default(),
-	/// # })?;
-	/// #
-	/// // set the panning to a fixed value
-	/// sound.set_panning(0.75)?;
-	///
-	/// // set the panning to follow a parameter
-	/// let parameter = audio_manager.add_parameter(0.5)?;
-	/// sound.set_panning(&parameter)?;
-	/// #
-	/// # Result::<(), Box<dyn Error>>::Ok(())
-	/// ```
-	pub fn set_panning(&mut self, panning: f64) -> Result<(), CommandQueueFull> {
-		self.command_producer
-			.push(Command::SetPanning(panning))
-			.map_err(|_| CommandQueueFull)
+	pub fn panning(&self) -> f64 {
+		self.panning.get()
+	}
+
+	pub fn set_volume(&mut self, volume: f64, tween: Tween) -> Result<(), CommandQueueFull> {
+		self.volume.set(volume, tween)
+	}
+
+	pub fn set_playback_rate(
+		&mut self,
+		playback_rate: f64,
+		tween: Tween,
+	) -> Result<(), CommandQueueFull> {
+		self.playback_rate.set(playback_rate, tween)
+	}
+
+	pub fn set_panning(&mut self, panning: f64, tween: Tween) -> Result<(), CommandQueueFull> {
+		self.panning.set(panning, tween)
 	}
 
 	/// Fades out the sound to silence with the given tween and then

@@ -1,24 +1,11 @@
-use std::{fmt::Display, sync::Arc};
+use std::sync::Arc;
 
-use kira::{sound::static_sound::PlaybackState, tween::Tween};
+use kira::{sound::static_sound::PlaybackState, tween::Tween, CommandQueueFull};
 use ringbuf::{Consumer, Producer};
 
 use crate::Error;
 
 use super::{sound::Shared, Command};
-
-/// An error that occurs when trying to modify a streaming sound
-/// whose command queue is full.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct CommandQueueFull;
-
-impl Display for CommandQueueFull {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str("Cannot send a command to the sound because the command queue is full")
-	}
-}
-
-impl std::error::Error for CommandQueueFull {}
 
 /// Controls a streaming sound.
 pub struct StreamingSoundHandle {

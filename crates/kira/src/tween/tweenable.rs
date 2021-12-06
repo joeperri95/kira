@@ -40,7 +40,7 @@ impl Tweenable {
 	}
 
 	/// Returns the current value of the [`Tweenable`].
-	pub fn value(&self) -> f64 {
+	pub fn get(&self) -> f64 {
 		self.value
 	}
 
