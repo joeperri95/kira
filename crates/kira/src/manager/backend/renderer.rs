@@ -94,7 +94,10 @@ impl Renderer {
 			&self.resources.clocks,
 			&mut self.resources.mixer,
 		);
-		let out = self.resources.mixer.process(self.context.dt);
+		let out = self
+			.resources
+			.mixer
+			.process(self.context.dt, &mut self.resources.clocks);
 		out * self.fade_volume.get() as f32
 	}
 }

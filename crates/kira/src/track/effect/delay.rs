@@ -1,6 +1,7 @@
 //! Adds echoes to a sound.
 
 use crate::{
+	clock::Clocks,
 	dsp::{interpolate_frame, Frame},
 	track::Effect,
 };
@@ -126,7 +127,7 @@ impl Effect for Delay {
 		}
 	}
 
-	fn process(&mut self, input: Frame, dt: f64) -> Frame {
+	fn process(&mut self, input: Frame, dt: f64, clocks: &mut Clocks) -> Frame {
 		if let DelayState::Initialized {
 			buffer,
 			write_position,
@@ -156,7 +157,7 @@ impl Effect for Delay {
 				fraction,
 			);
 			for effect in &mut self.feedback_effects {
-				output = effect.process(output, dt);
+				output = effect.process(output, dt, clocks);
 			}
 
 			// write output audio to the buffer

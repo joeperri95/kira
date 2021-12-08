@@ -2,7 +2,7 @@
 
 use std::f64::consts::PI;
 
-use crate::{dsp::Frame, track::Effect};
+use crate::{clock::Clocks, dsp::Frame, track::Effect};
 
 // This filter code is based on the filter code from baseplug:
 // https://github.com/wrl/baseplug/blob/trunk/examples/svf/svf_simper.rs
@@ -106,7 +106,7 @@ impl Filter {
 }
 
 impl Effect for Filter {
-	fn process(&mut self, input: Frame, dt: f64) -> Frame {
+	fn process(&mut self, input: Frame, dt: f64, _clocks: &mut Clocks) -> Frame {
 		let sample_rate = 1.0 / dt;
 		let g = (PI * (self.cutoff / sample_rate)).tan();
 		let k = 2.0 - (1.9 * self.resonance.min(1.0).max(0.0));

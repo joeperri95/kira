@@ -1,6 +1,6 @@
 //! Adds reverberations to a sound.
 
-use crate::{dsp::Frame, track::Effect};
+use crate::{clock::Clocks, dsp::Frame, track::Effect};
 use all_pass::AllPassFilter;
 use comb::CombFilter;
 
@@ -181,7 +181,7 @@ impl Effect for Reverb {
 		}
 	}
 
-	fn process(&mut self, input: Frame, _dt: f64) -> Frame {
+	fn process(&mut self, input: Frame, _dt: f64, _clocks: &mut Clocks) -> Frame {
 		if let ReverbState::Initialized {
 			comb_filters,
 			all_pass_filters,

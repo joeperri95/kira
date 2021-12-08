@@ -16,7 +16,7 @@ use std::sync::{
 
 use atomic_arena::Key;
 
-use crate::{dsp::Frame, manager::backend::context::Context};
+use crate::{clock::Clocks, dsp::Frame, manager::backend::context::Context};
 
 use self::effect::Effect;
 
@@ -75,16 +75,16 @@ pub(crate) struct Track {
 }
 
 impl Track {
-	pub fn new(mut settings: TrackSettings, context: &Arc<Context>) -> Self {
-		for effect in &mut settings.effects {
+	pub fn new(mut builder: TrackBuilder, context: &Arc<Context>) -> Self {
+		for effect in &mut builder.effects {
 			effect.init(context.sample_rate());
 		}
 		Self {
 			shared: Arc::new(TrackShared::new()),
-			volume: settings.volume,
-			panning: settings.panning,
-			routes: settings.routes.into_vec(),
-			effects: settings.effects,
+			volume: builder.volume,
+			panning: builder.panning,
+			routes: builder.routes.into_vec(),
+			effects: builder.effects,
 			input: Frame::ZERO,
 		}
 	}
@@ -109,10 +109,16 @@ impl Track {
 		self.input += input;
 	}
 
-	pub fn process(&mut self, dt: f64) -> Frame {
+	pub fn on_start_processing(&mut self) {
+		for effect in &mut self.effects {
+			effect.on_start_processing();
+		}
+	}
+
+	pub fn process(&mut self, dt: f64, clocks: &mut Clocks) -> Frame {
 		let mut output = std::mem::replace(&mut self.input, Frame::ZERO);
 		for effect in &mut self.effects {
-			output = effect.process(output, dt);
+			output = effect.process(output, dt, clocks);
 		}
 		output *= self.volume as f32;
 		output = output.panned(self.panning as f32);
