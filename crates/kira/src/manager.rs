@@ -12,7 +12,7 @@ use crate::{
 	clock::{Clock, ClockHandle, ClockId},
 	error::CommandError,
 	sound::SoundData,
-	track::{effect::Effect, SubTrackId, Track, TrackBuilder, TrackHandle, TrackId},
+	track::{SubTrackId, Track, TrackBuilder, TrackHandle, TrackId},
 	tween::Tween,
 };
 
@@ -64,8 +64,8 @@ pub struct AudioManagerSettings {
 	pub sub_track_capacity: usize,
 	/// The maximum number of clocks that can exist at a time.
 	pub clock_capacity: usize,
-	/// Effects that should be added to the main mixer track.
-	pub main_track_effects: Vec<Box<dyn Effect>>,
+	/// Settings for the main mixer track.
+	pub main_track_builder: TrackBuilder,
 }
 
 impl AudioManagerSettings {
@@ -109,10 +109,12 @@ impl AudioManagerSettings {
 		}
 	}
 
-	/// Specifies an effect to add to the main mixer track.
-	pub fn with_main_track_effect(mut self, effect: impl Effect + 'static) -> Self {
-		self.main_track_effects.push(Box::new(effect));
-		self
+	/// Configures the main mixer track.
+	pub fn main_track_builder(self, builder: TrackBuilder) -> Self {
+		Self {
+			main_track_builder: builder,
+			..self
+		}
 	}
 }
 
@@ -123,7 +125,7 @@ impl Default for AudioManagerSettings {
 			sound_capacity: 128,
 			sub_track_capacity: 128,
 			clock_capacity: 8,
-			main_track_effects: vec![],
+			main_track_builder: TrackBuilder::default(),
 		}
 	}
 }
